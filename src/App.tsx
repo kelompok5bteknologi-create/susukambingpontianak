@@ -26,6 +26,25 @@ import {
   INITIAL_ORDERS,
   INITIAL_BUYER_HISTORY,
 } from './data/mockData';
+import {
+  fetchFarmsFromDB,
+  fetchProductsFromDB,
+  fetchOtherProductsFromDB,
+  fetchOrdersFromDB,
+  fetchNotificationsFromDB,
+  fetchBuyerHistoryFromDB,
+  insertOrderToDB,
+  updateOrderStatusInDB,
+  updateProductStockInDB,
+  addProductToDB,
+  deleteProductFromDB,
+  addOtherProductToDB,
+  deleteOtherProductFromDB,
+  updateFarmInDB,
+  insertNotificationToDB,
+  insertBuyerHistoryToDB,
+  markAllNotificationsReadInDB,
+} from './lib/supabase';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { ProductCatalog } from './components/ProductCatalog';
@@ -89,6 +108,42 @@ export default function App() {
 
   // Education auto-highlight topic
   const [highlightedTopic, setHighlightedTopic] = useState<'grass-fed' | 'pasteurisasi' | null>(null);
+
+  // Load live data from Supabase on mount with fallback to mock data
+  useEffect(() => {
+    let isMounted = true;
+    async function loadFromDatabase() {
+      try {
+        const [dbFarms, dbProds, dbOther, dbOrders, dbNotifs, dbHist] = await Promise.all([
+          fetchFarmsFromDB(INITIAL_FARMS),
+          fetchProductsFromDB(INITIAL_PRODUCTS),
+          fetchOtherProductsFromDB(INITIAL_OTHER_PRODUCTS),
+          fetchOrdersFromDB(INITIAL_ORDERS),
+          fetchNotificationsFromDB(INITIAL_NOTIFICATIONS),
+          fetchBuyerHistoryFromDB(INITIAL_BUYER_HISTORY),
+        ]);
+
+        if (isMounted) {
+          if (dbFarms && dbFarms.length > 0) {
+            setFarms(dbFarms);
+            setSelectedFarm(dbFarms[0]);
+          }
+          if (dbProds && dbProds.length > 0) setProducts(dbProds);
+          if (dbOther && dbOther.length > 0) setOtherProducts(dbOther);
+          if (dbOrders && dbOrders.length > 0) setOrders(dbOrders);
+          if (dbNotifs && dbNotifs.length > 0) setNotifications(dbNotifs);
+          if (dbHist && dbHist.length > 0) setHistoryItems(dbHist);
+        }
+      } catch (err) {
+        console.warn('Could not sync with Supabase, using local defaults:', err);
+      }
+    }
+
+    loadFromDatabase();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Modals state
   const [reportModal, setReportModal] = useState<{ isOpen: boolean; targetType: string; targetName: string }>({
@@ -235,36 +290,39 @@ export default function App() {
     // Kosongkan keranjang belanja
     setCart([]);
 
+    const newHistoryItem: BuyerHistoryItem = {
+      id: 'hist-' + Date.now(),
+      orderNumber: newOrder.orderNumber,
+      status: 'Diproses',
+      date: 'Hari ini',
+      category: 'Pembelian',
+      items: newOrder.productName,
+      farmName: newOrder.farmName,
+      total: newOrder.total,
+      points: Math.floor(newOrder.total / 1000),
+      reorderProduct: 'Susu Kambing Segar 500ml',
+      reorderQty: newOrder.quantity,
+      price: 35000,
+    };
+
     // Tambahkan ke Riwayat Pesanan Pembeli (Bagian 2)
-    setHistoryItems((prev) => [
-      {
-        id: 'hist-' + Date.now(),
-        orderNumber: newOrder.orderNumber,
-        status: 'Diproses',
-        date: 'Hari ini',
-        category: 'Pembelian',
-        items: newOrder.productName,
-        farmName: newOrder.farmName,
-        total: newOrder.total,
-        points: Math.floor(newOrder.total / 1000),
-        reorderProduct: 'Susu Kambing Segar 500ml',
-        reorderQty: newOrder.quantity,
-        price: 35000,
-      },
-      ...prev,
-    ]);
+    setHistoryItems((prev) => [newHistoryItem, ...prev]);
+
+    const newNotif: NotificationItem = {
+      id: 'notif-' + Date.now(),
+      title: `Pesanan ${newOrder.orderNumber} berhasil dibuat`,
+      desc: `Pesanan sedang diverifikasi oleh peternak ${newOrder.farmName}.`,
+      type: 'order',
+      time: 'Baru saja',
+    };
 
     // Tambahkan notifikasi WhatsApp
-    setNotifications((prev) => [
-      {
-        id: 'notif-' + Date.now(),
-        title: `Pesanan ${newOrder.orderNumber} berhasil dibuat`,
-        desc: `Pesanan sedang diverifikasi oleh peternak ${newOrder.farmName}.`,
-        type: 'order',
-        time: 'Baru saja',
-      },
-      ...prev,
-    ]);
+    setNotifications((prev) => [newNotif, ...prev]);
+
+    // Simpan ke Supabase secara asinkron
+    insertOrderToDB(newOrder);
+    insertBuyerHistoryToDB(newHistoryItem);
+    insertNotificationToDB(newNotif);
 
     showToast(`Pesanan ${newOrder.orderNumber} berhasil dikirim ke peternak!`);
   };
@@ -275,47 +333,60 @@ export default function App() {
       prev.map((o) => (o.id === orderId ? { ...o, status } : o))
     );
 
+    // Update status di Supabase
+    updateOrderStatusInDB(orderId, status);
+
     if (status === 'Selesai') {
       const order = orders.find((o) => o.id === orderId);
-      setNotifications((prev) => [
-        {
-          id: 'notif-' + Date.now(),
-          title: `Pesanan ${order?.orderNumber || ''} telah selesai`,
-          desc: 'Kurir cooler box telah tiba di alamat tujuan Anda.',
-          type: 'order',
-          time: 'Baru saja',
-        },
-        ...prev,
-      ]);
+      const finishedNotif: NotificationItem = {
+        id: 'notif-' + Date.now(),
+        title: `Pesanan ${order?.orderNumber || ''} telah selesai`,
+        desc: 'Kurir cooler box telah tiba di alamat tujuan Anda.',
+        type: 'order',
+        time: 'Baru saja',
+      };
+      setNotifications((prev) => [finishedNotif, ...prev]);
+      insertNotificationToDB(finishedNotif);
     }
   };
 
   // Peternak menambah stok produk
   const handleAddStock = (productId: string, quantity: number) => {
     setProducts((prev) =>
-      prev.map((p) => (p.id === productId ? { ...p, stock: p.stock + quantity } : p))
+      prev.map((p) => {
+        if (p.id === productId) {
+          const updatedStock = p.stock + quantity;
+          updateProductStockInDB(productId, updatedStock);
+          return { ...p, stock: updatedStock };
+        }
+        return p;
+      })
     );
   };
 
   // Peternak menambah produk baru
   const handleAddNewProduct = (newProd: Product) => {
     setProducts((prev) => [newProd, ...prev]);
+    addProductToDB(newProd);
   };
 
   // Peternak menghapus produk
   const handleDeleteProduct = (productId: string) => {
     setProducts((prev) => prev.filter((p) => p.id !== productId));
+    deleteProductFromDB(productId);
     showToast('Produk berhasil dihapus dari katalog.');
   };
 
   // Peternak menambah produk unggulan lainnya (KOHE, Kunjungan, Kambing Jantan)
   const handleAddOtherProduct = (item: FarmOtherProduct) => {
     setOtherProducts((prev) => [item, ...prev]);
+    addOtherProductToDB(item);
   };
 
   // Peternak menghapus produk unggulan lainnya
   const handleDeleteOtherProduct = (id: string) => {
     setOtherProducts((prev) => prev.filter((item) => item.id !== id));
+    deleteOtherProductFromDB(id);
     showToast('Item berhasil dihapus.');
   };
 
@@ -327,6 +398,7 @@ export default function App() {
     if (selectedFarm.id === updatedFarm.id) {
       setSelectedFarm(updatedFarm);
     }
+    updateFarmInDB(updatedFarm);
   };
 
   return (
@@ -351,6 +423,7 @@ export default function App() {
         notifications={notifications}
         onClearNotifications={() => {
           setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+          markAllNotificationsReadInDB();
           showToast('Semua notifikasi WhatsApp telah ditandai dibaca.');
         }}
       />
