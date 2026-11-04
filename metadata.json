@@ -1,0 +1,6 @@
+{
+  "name": "final project susu kambing",
+  "description": "Marketplace dan edukasi susu kambing segar terpercaya langsung dari peternak di Pontianak.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  
+  --color-forest: #2C5F2D;
+  --color-forest-50: #F2F7F2;
+  --color-forest-100: #E2EFE2;
+  --color-forest-600: #234D24;
+  --color-forest-700: #1B3B1C;
+
+  --color-cream: #FDFBF7;
+  --color-cream-100: #F9F5EC;
+  --color-cream-200: #EFE8D8;
+
+  --color-sky: #1976D2;
+  --color-sky-50: #E1F5FE;
+  --color-sky-100: #B3E5FC;
+  --color-sky-600: #1565C0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #FDFBF7;
+  color: #1E293B;
+}
+
+.badge-terpilih {
+  border: 3px solid #2C5F2D !important;
+  box-shadow: 0 4px 14px rgba(44, 95, 45, 0.25);
+}
