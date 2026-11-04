@@ -175,6 +175,7 @@ export const FarmSelection: React.FC<FarmProfileProps> = ({
                       <img
                         src={item.image}
                         alt={item.name}
+                        referrerPolicy="no-referrer"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                       <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-white/95 text-[10px] font-black text-forest shadow-xs">

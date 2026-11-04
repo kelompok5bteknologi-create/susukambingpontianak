@@ -7,6 +7,7 @@ import {
   Farm,
   FarmOtherProduct,
 } from '../types';
+import goatBarnImage from '../assets/images/dairy_goat_farm_1790247733097.jpg';
 
 interface FarmerDashboardProps {
   sellerPage: SellerPage;
@@ -174,7 +175,7 @@ export const FarmerDashboard: React.FC<FarmerDashboardProps> = ({
         newOtherCategory === 'KOHE'
           ? 'https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?q=80&w=800&auto=format&fit=crop'
           : newOtherCategory === 'Kunjungan Peternakan'
-          ? 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?q=80&w=800&auto=format&fit=crop'
+          ? goatBarnImage
           : 'https://images.unsplash.com/photo-1524024973431-2ad916746881?q=80&w=800&auto=format&fit=crop',
     };
 

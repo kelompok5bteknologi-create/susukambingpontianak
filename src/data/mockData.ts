@@ -1,4 +1,5 @@
 import { Farm, Product, PreorderSlot, NotificationItem, OrderItem, FarmOtherProduct, BuyerHistoryItem } from '../types';
+import goatBarnImage from '../assets/images/dairy_goat_farm_1790247733097.jpg';
 
 export const INITIAL_FARMS: Farm[] = [
   {
@@ -111,7 +112,7 @@ export const INITIAL_OTHER_PRODUCTS: FarmOtherProduct[] = [
     unit: 'Orang',
     description:
       'Wisata peternakan edukatif: pengalaman memerah susu kambing langsung di kandang panggung, memberi makan rumput segar, plus 1 botol susu gratis.',
-    image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?q=80&w=800&auto=format&fit=crop',
+    image: goatBarnImage,
   },
   {
     id: 'other-goat-1',
@@ -144,7 +145,7 @@ export const INITIAL_OTHER_PRODUCTS: FarmOtherProduct[] = [
     unit: 'Orang',
     description:
       'Kunjungan belajar budidaya kambing Etawa perah di Pontianak Utara. Cocok untuk rombongan sekolah dan mahasiswa.',
-    image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?q=80&w=800&auto=format&fit=crop',
+    image: goatBarnImage,
   },
   {
     id: 'other-goat-2',
