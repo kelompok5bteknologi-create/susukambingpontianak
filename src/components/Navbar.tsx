@@ -60,24 +60,24 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className="sticky top-0 z-50 bg-[#FDFBF7]/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo & Tagline */}
+          {/* Logo & Brand Name */}
           <button
             type="button"
             onClick={() => {
               if (role === 'buyer') setBuyerPage('home');
               else setSellerPage('dashboard');
             }}
-            className="flex items-center gap-3 cursor-pointer text-left focus:outline-none group"
+            className="flex items-center gap-2.5 cursor-pointer text-left focus:outline-none group shrink-0"
           >
-            <div className="w-11 h-11 rounded-2xl bg-forest text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-              <i className="ti ti-bottle text-2xl"></i>
+            <div className="w-10 h-10 rounded-xl bg-forest text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform shrink-0">
+              <i className="ti ti-bottle text-xl leading-none"></i>
             </div>
-            <div>
-              <span className="text-xl font-extrabold tracking-tight text-slate-900 block leading-tight">
-                Susu Kambing <span className="text-forest">Pontianak</span>
+            <div className="flex flex-col justify-center leading-none">
+              <span className="text-base sm:text-lg font-extrabold tracking-tight text-slate-900 leading-tight">
+                Susu Kambing
               </span>
-              <span className="text-[11px] font-semibold text-slate-500 tracking-tight block">
-                Penjualan dan Edukasi Susu Kambing Terlengkap
+              <span className="text-xs sm:text-sm font-black tracking-wide text-forest uppercase leading-tight">
+                Pontianak
               </span>
             </div>
           </button>
